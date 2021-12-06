@@ -1,6 +1,5 @@
 module AdventOfCode2021.Day2
 
-open System
 open Utilities
 
 type Move =
@@ -26,7 +25,7 @@ let parseMove move =
     | "forward" -> Forward
     | "up" -> Up
     | "down" -> Down
-    | _ -> raise (Exception($"Unknown move: {move}"))
+    | _ -> failwith $"Unknown move: {move}"
 
 let parseLine (line: string) =
     let fields = line.Split(" ")

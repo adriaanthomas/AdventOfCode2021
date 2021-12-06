@@ -2,5 +2,5 @@
 
 [<EntryPoint>]
 let main _ =
-    Day2.run ()
+    Day3.run ()
     0
