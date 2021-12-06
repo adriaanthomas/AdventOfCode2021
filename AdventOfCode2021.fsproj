@@ -8,9 +8,13 @@
   <ItemGroup>
     <Compile Include="Utilities.fs" />
     <Compile Include="Day1.fs" />
+    <Compile Include="Day2.fs" />
     <Compile Include="Program.fs" />
     <None Include="Day1.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <Content Include="Day2.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 </Project>

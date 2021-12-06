@@ -2,9 +2,7 @@ module AdventOfCode2021.Day1
 
 open Utilities
 
-let readings =
-    readLines "day1.txt"
-    |> List.map int
+let readings = readLines "day1.txt" |> List.map int
 
 let countDepthIncreases data =
     data
@@ -18,6 +16,6 @@ let countDepthIncreasesWithNoiseReduction data =
     |> List.map List.sum
     |> countDepthIncreases
 
-let run() =
+let run () =
     printfn $"Number of depth increases: {countDepthIncreases readings}"
     printfn $"Number of depth increases with noise reduction: {countDepthIncreasesWithNoiseReduction readings}"
