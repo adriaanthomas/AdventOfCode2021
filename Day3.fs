@@ -1,7 +1,19 @@
 module AdventOfCode2021.Day3
 
-open System
 open Utilities
+
+type Bit = bool
+
+type Bits = Bit array
+
+let parseBits (line: string) : Bits =
+    let charToBit ch =
+        match ch with
+        | '1' -> true
+        | '0' -> false
+        | _ -> failwith $"Not a bit character: {ch}"
+
+    line.ToCharArray() |> Array.map charToBit
 
 let testData =
     [ "00100"
@@ -16,51 +28,101 @@ let testData =
       "11001"
       "00010"
       "01010" ]
+    |> List.map parseBits
 
-let data = readLines "Day3.txt"
+let data =
+    readLines "Day3.txt" |> List.map parseBits
 
-let splitIntoBits (line: string) =
-    let testBit index data =
-        let bit = 1 <<< index
-        if (data &&& bit) = bit then 1 else 0
+let countBit bit = if bit then 0, 1 else 1, 0
 
-    let len = line.Length
-    let data = Convert.ToInt32(line, 2)
+let mostCommonBit (zeros, ones) = ones >= zeros
+let leastCommonBit (zeros, ones) = ones < zeros
 
-    [ len - 1 .. -1 .. 0 ]
-    |> List.map (fun x -> testBit x data)
+let addCounts (c10, c11) (c20, c21) = c10 + c20, c11 + c21
 
-let combineBitCounts (counts1: int list) (counts2: int list) =
-    List.zip counts1 counts2
-    |> List.map (fun (x, y) -> x + y)
+let mostCommonBits (values: Bits list) : Bits =
+    let countBits bits = bits |> Array.map countBit
 
-let bitsToInt (bits: int list) =
-    let rec bitsToInt acc bits =
-        match bits with
-        | [] -> acc
-        | head :: tail -> bitsToInt (acc + (head <<< bits.Length - 1)) tail
+    let addBitCounts counts1 counts2 =
+        Array.zip counts1 counts2
+        |> Array.map (fun (c1, c2) -> addCounts c1 c2)
 
-    bitsToInt 0 bits
+    values
+    |> List.map countBits
+    |> List.reduce addBitCounts
+    |> Array.map mostCommonBit
 
-let gammaAndEpsilon (data: string list) =
-    let len = data.Length
+let bitsAt (index: int) (values: Bits list) : Bit list = values |> List.map (fun b -> b.[index])
 
-    let gammaBits =
-        data
-        |> List.map splitIntoBits
-        |> List.reduce combineBitCounts
-        |> List.map (fun c -> if c > len / 2 then 1 else 0)
+let commonBitAt (bitSelector: int * int -> Bit) (index: int) (values: Bits list) : Bit =
+    values
+    |> bitsAt index
+    |> List.map countBit
+    |> List.reduce addCounts
+    |> bitSelector
 
-    let gamma = bitsToInt gammaBits
+let bitsToInt (bits: Bits) : int =
+    let bitToInt index bit =
+        if bit then
+            1 <<< bits.Length - 1 - index
+        else
+            0
 
-    let epsilon =
-        gammaBits
-        |> List.map (fun c -> 1 - c)
-        |> bitsToInt
+    bits |> Array.mapi bitToInt |> Array.sum
+
+let inverseBits (bits: Bits) : Bits = bits |> Array.map not
+
+let gammaAndEpsilon (data: Bits list) =
+    let mostCommon = mostCommonBits data
+    let gamma = mostCommon |> bitsToInt
+    let epsilon = mostCommon |> inverseBits |> bitsToInt
 
     gamma, epsilon
 
+let oxygenGeneratorAndCO2ScrubberRatings (data: Bits list) =
+    //    let bitToString bit = if bit then "1" else "0"
+//
+//    let bitsToString bits =
+//        bits
+//        |> Array.map bitToString
+//        |> Array.fold (fun a b -> a + b) ""
+//
+//    let bitsListToString values =
+//        values
+//        |> List.map bitsToString
+//        |> String.concat ", "
+
+    let rec filterCommonAt (bitSelector: int * int -> Bit) (index: int) (values: Bits list) =
+        //        printfn $"filterCommonAt {denominator} {index} {bitsListToString values}"
+
+        match values with
+        | [] -> failwith "Not enough data"
+        | [ x ] -> x
+        | _ ->
+            let common = values |> commonBitAt bitSelector index
+
+            let remaining =
+                values
+                |> List.filter (fun v -> v.[index] = common)
+
+            filterCommonAt bitSelector (index + 1) remaining
+
+    let filterMostCommon = filterCommonAt mostCommonBit 0
+    let filterLeastCommon = filterCommonAt leastCommonBit 0
+    let oxygenGenerator = data |> filterMostCommon |> bitsToInt
+    let co2ScrubberRatings = data |> filterLeastCommon |> bitsToInt
+
+    oxygenGenerator, co2ScrubberRatings
+
 let run () : unit =
-    let gamma, epsilon = gammaAndEpsilon data
+    let values = testData
+    let gamma, epsilon = gammaAndEpsilon values
     printfn $"gamma = {gamma}; epsilon = {epsilon}"
-    printfn $"result = {gamma * epsilon}"
+    printfn $"power consumption = {gamma * epsilon}"
+    printfn ""
+
+    let ogr, csr =
+        oxygenGeneratorAndCO2ScrubberRatings values
+
+    printfn $"oxygen generator rating = {ogr}; CO2 scrubber rating = {csr}"
+    printfn $"life support rating = {ogr * csr}"
