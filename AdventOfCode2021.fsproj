@@ -6,10 +6,11 @@
     <AssemblyName>AdventOfCode2021</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Utilities.fs" />
+      <Compile Include="Utilities.fs"/>
       <Compile Include="Day1.fs"/>
       <Compile Include="Day2.fs"/>
       <Compile Include="Day3.fs"/>
+      <Compile Include="Day4.fs"/>
       <Compile Include="Program.fs"/>
       <None Include="Day1.txt">
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -18,6 +19,9 @@
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
       <Content Include="Day3.txt">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <Content Include="Day4.txt">
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
   </ItemGroup>
