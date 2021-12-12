@@ -22,8 +22,8 @@ type Board private (cells: BoardCell array, columns: int) =
           Row = index % columns }
 
     let positionToIndex =
-        cells
-        |> Array.mapi (fun i c -> indexToPosition i, i)
+        [| 0 .. Array.length cells - 1 |]
+        |> Array.map (fun i -> indexToPosition i, i)
         |> Map.ofArray
 
     let valueToIndex =
@@ -179,7 +179,18 @@ let rec findWinningBoardsAndValue (boards: Board list) values =
         | x :: xs -> Some(x :: xs, value)
         | [] -> findWinningBoardsAndValue boards remainingValues
 
-let run () : unit =
+let findLastWinningBoardsAndValue (boards: Board list) values =
+    let rec processValue (lastWinningBoards, lastWinningValue, remainingBoards: Board list) value =
+        match remainingBoards
+              |> List.filter (fun b -> b.SetValue(value) = Bingo) with
+        | [] -> lastWinningBoards, lastWinningValue, remainingBoards
+        | newWinning -> newWinning, Some value, List.except newWinning remainingBoards
+
+    match List.fold processValue (List.empty, None, boards) values with
+    | _, None, _ -> None
+    | boards, Some value, _ -> Some(boards, value)
+
+let step1 lines =
     let values, boards = parseLines lines
     printBoards boards
 
@@ -187,3 +198,16 @@ let run () : unit =
     | None -> failwith "Not enough values for any board to win"
     | Some ([ board ], value) -> printfn $"Winning: {(board.GetUnsetValues() |> Array.sum) * value}"
     | _ -> failwith "More than one board won, not supported"
+
+let step2 lines =
+    let values, boards = parseLines lines
+
+    match findLastWinningBoardsAndValue boards values with
+    | None -> failwith "Not enough values for any board to win"
+    | Some ([ board ], value) -> printfn $"Last winning: {(board.GetUnsetValues() |> Array.sum) * value}"
+    | _ -> failwith "More than one board won, not supported"
+
+let run () : unit =
+    let data = lines
+    step1 data
+    step2 data
